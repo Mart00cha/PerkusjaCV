@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">OpenCV</string>
+    <string name="action_settings">Settings</string>
+    <string name="not_started">Not started</string>
+    <string name="started">Started</string>
+    <string name="perform">Perform</string>
+
+</resources>
