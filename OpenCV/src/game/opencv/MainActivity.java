@@ -1,8 +1,10 @@
 package game.opencv;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 
 import android.app.Activity;
 import android.app.Notification;
@@ -80,7 +82,7 @@ public class MainActivity extends Activity {
 		// We use it on Notification start, and to cancel it.
 		private int NOTIFICATION = R.string.started;
 
-		private boolean serverActive = true;
+		// private boolean serverActive = true;
 
 		public void startServer() {
 			AsyncTask<Void, Void, Void> async = new AsyncTask<Void, Void, Void>() {
@@ -89,36 +91,54 @@ public class MainActivity extends Activity {
 					DatagramSocket socket = null;
 
 					try {
-						byte[] message = new byte[100];
-						DatagramPacket packet = new DatagramPacket(message, message.length, InetAddress.getByName("127.0.0.1"), 9876);
-
 						socket = new DatagramSocket();
 						socket.setBroadcast(true);
 
-						int n = 10000;
-						int i = 0;
+						final DatagramSocket finalSocket = socket;
 
-						long start = System.currentTimeMillis();
+						startOpenCV(new SendingFunction() {
+							@Override
+							public void send(String value) throws IOException {
+								byte[] message = value.getBytes();
+								DatagramPacket packet = new DatagramPacket(message, message.length, InetAddress.getByName("127.0.0.1"),
+										9876);
 
-						while (serverActive) {
-							if (i == n) {
-								break;
+								finalSocket.send(packet);
 							}
+						});
 
-							socket.send(packet);
-
-							// socket.receive(packet);
-							
-							i++;
-						}
-
-						long end = System.currentTimeMillis();
-
-						System.out.println("Pockets = " + n);
-						System.out.println("Total time = " + (end - start) + "ms");
-						System.out.println("Avg time = " + (double)(end - start) / n + "ms");
-
-					} catch (Exception e) {
+						// ########### testing ######
+						// byte[] message = new byte[100];
+						// DatagramPacket packet = new DatagramPacket(message,
+						// message.length, InetAddress.getByName("127.0.0.1"),
+						// 9876);
+						//
+						// finalSocket.send(packet);
+						// int n = 10000;
+						// int i = 0;
+						//
+						// long start = System.currentTimeMillis();
+						//
+						// while (serverActive) {
+						// if (i == n) {
+						// break;
+						// }
+						//
+						// finalSocket.send(packet);
+						//
+						// // socket.receive(packet);
+						//
+						// i++;
+						// }
+						//
+						// long end = System.currentTimeMillis();
+						//
+						// System.out.println("Pockets = " + n);
+						// System.out.println("Total time = " + (end - start) +
+						// "ms");
+						// System.out.println("Avg time = " + (double) (end -
+						// start) / n + "ms");
+					} catch (SocketException e) {
 						e.printStackTrace();
 					} finally {
 						if (socket != null) {
@@ -133,8 +153,16 @@ public class MainActivity extends Activity {
 			async.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 
+		private static interface SendingFunction {
+			void send(String value) throws IOException;
+		}
+
+		private void startOpenCV(SendingFunction sendingFunction) {
+			// TODO start openCV here
+		}
+
 		public void stopServer() {
-			serverActive = false;
+			// serverActive = false;
 		}
 
 		/**
